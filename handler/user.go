@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"net/http"
@@ -21,11 +21,11 @@ type UpdateUserRequest struct {
 	Age  int    `json:"age" validate:"gte=0"`
 }
 
-func getUsers(c echo.Context) error {
+func GetUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK,users)
 }
 
-func getUser(c echo.Context) error {
+func GetUser(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid id")
@@ -38,7 +38,7 @@ func getUser(c echo.Context) error {
 	return errorResponse(c, http.StatusNotFound, "user not found")
 }
 
-func createUser(c echo.Context) error {
+func CreateUser(c echo.Context) error {
 	var req CreateUserRequest
 	if err := c.Bind(&req); err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid request")
@@ -56,7 +56,7 @@ func createUser(c echo.Context) error {
 	return c.JSON(http.StatusCreated, user)
 }
 
-func updateUser(c echo.Context) error {
+func UpdateUser(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid id")
@@ -78,7 +78,7 @@ func updateUser(c echo.Context) error {
 	return errorResponse(c, http.StatusNotFound, "user not found")
 }
 
-func deleteUser(c echo.Context) error {
+func DeleteUser(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid id")

@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"net/http"
@@ -9,6 +9,12 @@ import (
 
 type CustomValidator struct {
 	validator *validator.Validate
+}
+
+func NewCustomValidator(v *validator.Validate) *CustomValidator {
+	return &CustomValidator{
+		validator: v,
+	}
 }
 
 func (cv *CustomValidator) Validate(i interface{}) error {

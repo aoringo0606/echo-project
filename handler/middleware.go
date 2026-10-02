@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func loggerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func LoggerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		fmt.Println(c.Request().Method + " " + c.Request().URL.Path)
 
@@ -25,7 +25,7 @@ func loggerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func authMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		authorization := c.Request().Header.Get("Authorization")
 
