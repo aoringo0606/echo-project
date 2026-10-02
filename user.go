@@ -5,15 +5,10 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/aoringo0606/echo-project/model"
 )
 
-type User struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
-	Age  int    `json:"age"`
-}
-
-var users []User
+var users []model.User
 var nextID = 1
 
 type CreateUserRequest struct {
@@ -51,7 +46,7 @@ func createUser(c echo.Context) error {
 	if err := c.Validate(&req); err!= nil {
 		return handleValidationError(c, err)
 	}
-	user := User{
+	user := model.User{
 		Name: req.Name,
 		Age: req.Age,
 	}

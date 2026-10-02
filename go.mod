@@ -1,4 +1,4 @@
-module echo-project
+module github.com/aoringo0606/echo-project
 
 go 1.26.4
 
