@@ -41,12 +41,12 @@ func (h *UserHandler) GetUser(c echo.Context) error {
 	if err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid id")
 	}
-	for _, user := range users {
-		if user.ID == id {
-			return c.JSON(http.StatusOK, user)
-		}
+	user, ok := h.repo.FindByID(id)
+	if !ok {
+		return errorResponse(c, http.StatusNotFound, "user not found")
 	}
-	return errorResponse(c, http.StatusNotFound, "user not found")
+	return c.JSON(http.StatusOK, user)
+	
 }
 
 func (h *UserHandler) CreateUser(c echo.Context) error {
@@ -57,13 +57,7 @@ func (h *UserHandler) CreateUser(c echo.Context) error {
 	if err := c.Validate(&req); err!= nil {
 		return handleValidationError(c, err)
 	}
-	user := model.User{
-		Name: req.Name,
-		Age: req.Age,
-	}
-	user.ID = nextID
-	nextID++
-	users = append(users, user)
+	user := h.repo.Create(req.Name, req.Age)
 	return c.JSON(http.StatusCreated, user)
 }
 
