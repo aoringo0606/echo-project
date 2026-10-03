@@ -6,6 +6,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/aoringo0606/echo-project/model"
+	"github.com/aoringo0606/echo-project/repository"
 )
 
 var users []model.User
@@ -21,11 +22,21 @@ type UpdateUserRequest struct {
 	Age  int    `json:"age" validate:"gte=0"`
 }
 
-func GetUsers(c echo.Context) error {
+type UserHandler struct {
+	repo *repository.UserRepository
+}
+
+func NewUserHandler(repo *repository.UserRepository) *UserHandler {
+	return &UserHandler{
+		repo: repo,
+	}
+}
+
+func (h *UserHandler) GetUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK,users)
 }
 
-func GetUser(c echo.Context) error {
+func (h *UserHandler) GetUser(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid id")
@@ -38,7 +49,7 @@ func GetUser(c echo.Context) error {
 	return errorResponse(c, http.StatusNotFound, "user not found")
 }
 
-func CreateUser(c echo.Context) error {
+func (h *UserHandler) CreateUser(c echo.Context) error {
 	var req CreateUserRequest
 	if err := c.Bind(&req); err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid request")
@@ -56,7 +67,7 @@ func CreateUser(c echo.Context) error {
 	return c.JSON(http.StatusCreated, user)
 }
 
-func UpdateUser(c echo.Context) error {
+func (h *UserHandler) UpdateUser(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid id")
@@ -78,7 +89,7 @@ func UpdateUser(c echo.Context) error {
 	return errorResponse(c, http.StatusNotFound, "user not found")
 }
 
-func DeleteUser(c echo.Context) error {
+func (h *UserHandler) DeleteUser(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid id")

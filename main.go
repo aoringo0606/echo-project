@@ -4,15 +4,19 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/aoringo0606/echo-project/handler"
+	"github.com/aoringo0606/echo-project/repository"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
-	"github.com/aoringo0606/echo-project/handler"
 )
 
 func main() {
 	e := echo.New()
 
 	e.Use(handler.LoggerMiddleware)
+
+	repo := repository.NewUserRepository()
+	userHandler := handler.NewUserHandler(repo)
 
 	v := validator.New()
 
@@ -30,14 +34,14 @@ func main() {
 
 	userGroup := e.Group("/users")
 
-	userGroup.GET("", handler.GetUsers)
-	userGroup.GET("/:id", handler.GetUser)
+	userGroup.GET("", userHandler.GetUsers)
+	userGroup.GET("/:id", userHandler.GetUser)
 
 	protectedUsers := userGroup.Group("", handler.AuthMiddleware)
 
-	protectedUsers.POST("", handler.CreateUser)
-	protectedUsers.PUT("/:id", handler.UpdateUser)
-	protectedUsers.DELETE("/:id", handler.DeleteUser)
+	protectedUsers.POST("", userHandler.CreateUser)
+	protectedUsers.PUT("/:id", userHandler.UpdateUser)
+	protectedUsers.DELETE("/:id", userHandler.DeleteUser)
 
 	e.Start(":8080")
 }
