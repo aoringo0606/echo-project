@@ -42,3 +42,22 @@ func (r *UserRepository) FindByID(id int) (model.User, bool) {
 	return model.User{}, false
 }
 
+func (r *UserRepository) Update(id int, name string, age int) (model.User, bool) {
+	for i, user := range r.users {
+		if user.ID == id {
+			r.users[i].Name = name
+			r.users[i].Age = age
+		}
+	}
+	return model.User{}, false
+}
+
+func (r *UserRepository) Delete(id int) bool {
+	for i, user := range r.users {
+		if user.ID == id {
+			r.users = append(r.users[:i], r.users[i+1:]...)
+			return true
+		}
+	}
+	return false
+}

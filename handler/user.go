@@ -70,14 +70,11 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 	if err := c.Validate(&req); err!= nil {
 		return handleValidationError(c, err)
 	}
-	for i, user := range users {
-		if user.ID == id {
-			users[i].Name = req.Name
-			users[i].Age = req.Age
-			return c.JSON(http.StatusOK, users[i])
-		}
+	user, ok := h.repo.Update(id, req.Name, req.Age)
+	if !ok {
+		return errorResponse(c, http.StatusNotFound, "user not found")
 	}
-	return errorResponse(c, http.StatusNotFound, "user not found")
+	return c.JSON(http.StatusOK, user)
 }
 
 func (h *UserHandler) DeleteUser(c echo.Context) error {
@@ -85,11 +82,9 @@ func (h *UserHandler) DeleteUser(c echo.Context) error {
 	if err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid id")
 	}
-	for i, user := range users {
-		if user.ID == id {
-			users = append(users[:i], users[i+1:]...)
-			return c.NoContent(http.StatusNoContent)
-		}
+	ok := h.repo.Delete(id)
+	if !ok {
+		return errorResponse(c, http.StatusNotFound, "user not found")
 	}
-	return errorResponse(c, http.StatusNotFound, "user not found")
+	return c.NoContent(http.StatusNoContent)
 }
