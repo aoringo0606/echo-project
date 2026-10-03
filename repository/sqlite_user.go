@@ -81,3 +81,42 @@ func (r *SQLiteUserRepository) Create(name string, age int) (model.User, error) 
 	return user, nil
 }
 
+func (r *SQLiteUserRepository) Update(id int, name string, age int) (model.User, error) {
+	result, err := r.db.Exec(
+		"UPDATE users SET name = ?, age = ? WHERE id = ?",
+		name,
+		age,
+		id,
+	)
+	if err != nil{
+		return model.User{}, err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil{
+		return model.User{}, err
+	}
+	if affected == 0 {
+		return model.User{}, ErrUserNotFound
+	}
+	user := model.User{
+		ID: id,
+		Name: name,
+		Age: age,
+	}
+	return user, nil
+}
+
+func (r *SQLiteUserRepository) Delete(id int) error {
+	result, err := r.db.Exec("DELETE FROM users WHERE id = ?")
+	if err != nil {
+		return err
+	}
+	affected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return ErrUserNotFound
+	}
+	return nil
+}

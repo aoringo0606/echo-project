@@ -39,7 +39,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	repo := repository.NewUserRepository()
+	repo := repository.NewSQLiteUserRepository(db)
 	userHandler := handler.NewUserHandler(repo)
 
 	v := validator.New()
