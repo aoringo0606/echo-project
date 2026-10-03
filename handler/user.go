@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/aoringo0606/echo-project/repository"
+	"github.com/aoringo0606/echo-project/model"
 )
 
 type CreateUserRequest struct {
@@ -18,11 +18,19 @@ type UpdateUserRequest struct {
 	Age  int    `json:"age" validate:"gte=0"`
 }
 
-type UserHandler struct {
-	repo *repository.UserRepository
+type UserRepository interface {
+	GetAll() []model.User
+	FindByID(id int) (model.User, bool)
+	Create(name string, age int) model.User
+	Update(id int, name string, age int) (model.User, bool)
+	Delete(id int) bool
 }
 
-func NewUserHandler(repo *repository.UserRepository) *UserHandler {
+type UserHandler struct {
+	repo UserRepository
+}
+
+func NewUserHandler(repo UserRepository) *UserHandler {
 	return &UserHandler{
 		repo: repo,
 	}
