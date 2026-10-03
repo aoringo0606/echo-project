@@ -107,7 +107,10 @@ func (r *SQLiteUserRepository) Update(id int, name string, age int) (model.User,
 }
 
 func (r *SQLiteUserRepository) Delete(id int) error {
-	result, err := r.db.Exec("DELETE FROM users WHERE id = ?")
+	result, err := r.db.Exec(
+		"DELETE FROM users WHERE id = ?",
+		id,
+	)
 	if err != nil {
 		return err
 	}
