@@ -40,8 +40,8 @@ func NewUserHandler(repo UserRepository) *UserHandler {
 
 func (h *UserHandler) GetUsers(c echo.Context) error {
 	users, err := h.repo.GetAll()
-	if errors.Is(err, repository.ErrUserNotFound) {
-		return errorResponse(c, http.StatusNotFound, "user not found")
+	if err != nil {
+		return errorResponse(c, http.StatusInternalServerError, "internal server error")
 	}
 	return c.JSON(http.StatusOK, users)
 }
@@ -52,8 +52,11 @@ func (h *UserHandler) GetUser(c echo.Context) error {
 		return errorResponse(c, http.StatusBadRequest, "invalid id")
 	}
 	user, err := h.repo.FindByID(id)
-	if errors.Is(err, repository.ErrUserNotFound) {
-		return errorResponse(c, http.StatusNotFound, "user not found")
+	if err != nil {
+		if errors.Is(err, repository.ErrUserNotFound) {
+			return errorResponse(c, http.StatusNotFound, "user not found")
+		}
+		return errorResponse(c, http.StatusInternalServerError, "internal server error")
 	}
 	return c.JSON(http.StatusOK, user)
 	
@@ -68,8 +71,8 @@ func (h *UserHandler) CreateUser(c echo.Context) error {
 		return handleValidationError(c, err)
 	}
 	user, err := h.repo.Create(req.Name, req.Age)
-	if errors.Is(err, repository.ErrUserNotFound) {
-		return errorResponse(c, http.StatusNotFound, "user not found")
+	if err != nil {
+		return errorResponse(c, http.StatusInternalServerError, "internal server error")
 	}
 	return c.JSON(http.StatusCreated, user)
 }
@@ -87,8 +90,11 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 		return handleValidationError(c, err)
 	}
 	user, err := h.repo.Update(id, req.Name, req.Age)
-	if errors.Is(err, repository.ErrUserNotFound) {
-		return errorResponse(c, http.StatusNotFound, "user not found")
+	if err != nil {
+		if errors.Is(err, repository.ErrUserNotFound) {
+			return errorResponse(c, http.StatusNotFound, "user not found")
+		}
+		return errorResponse(c, http.StatusInternalServerError, "internal server error")
 	}
 	return c.JSON(http.StatusOK, user)
 }
@@ -99,8 +105,11 @@ func (h *UserHandler) DeleteUser(c echo.Context) error {
 		return errorResponse(c, http.StatusBadRequest, "invalid id")
 	}
 	err = h.repo.Delete(id)
-	if errors.Is(err, repository.ErrUserNotFound) {
-		return errorResponse(c, http.StatusNotFound, "user not found")
+	if err != nil {
+		if errors.Is(err, repository.ErrUserNotFound) {
+			return errorResponse(c, http.StatusNotFound, "user not found")
+		}
+		return errorResponse(c, http.StatusInternalServerError, "internal server error")
 	}
 	return c.NoContent(http.StatusNoContent)
 }
