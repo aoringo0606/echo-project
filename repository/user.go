@@ -1,6 +1,8 @@
 package repository
 
 import(
+	"errors"
+
 	"github.com/aoringo0606/echo-project/model"
 )
 
@@ -9,6 +11,8 @@ type UserRepository struct {
 	nextID int
 }
 
+var ErrUserNotFound = errors.New("user not found")
+
 func NewUserRepository() *UserRepository {
 	return &UserRepository{
 		users:  []model.User{},
@@ -16,11 +20,11 @@ func NewUserRepository() *UserRepository {
 	}
 }
 
-func (r *UserRepository) GetAll() []model.User {
-	return r.users
+func (r *UserRepository) GetAll() ([]model.User, error) {
+	return r.users, nil
 }
 
-func (r *UserRepository) Create(name string, age int) model.User {
+func (r *UserRepository) Create(name string, age int) (model.User, error) {
 	user := model.User{
 		ID: r.nextID,
 		Name: name,
@@ -30,35 +34,35 @@ func (r *UserRepository) Create(name string, age int) model.User {
 	r.nextID++
 	r.users = append(r.users, user)
 
-	return user
+	return user, nil
 }
 
-func (r *UserRepository) FindByID(id int) (model.User, bool) {
+func (r *UserRepository) FindByID(id int) (model.User, error) {
 	for _, user := range r.users {
 		if user.ID == id {
-			return user, true
+			return user, nil
 		}
 	}
-	return model.User{}, false
+	return model.User{}, ErrUserNotFound
 }
 
-func (r *UserRepository) Update(id int, name string, age int) (model.User, bool) {
+func (r *UserRepository) Update(id int, name string, age int) (model.User, error) {
 	for i, user := range r.users {
 		if user.ID == id {
 			r.users[i].Name = name
 			r.users[i].Age = age
-			return r.users[i], true
+			return r.users[i], nil
 		}
 	}
-	return model.User{}, false
+	return model.User{}, ErrUserNotFound
 }
 
-func (r *UserRepository) Delete(id int) bool {
+func (r *UserRepository) Delete(id int) error {
 	for i, user := range r.users {
 		if user.ID == id {
 			r.users = append(r.users[:i], r.users[i+1:]...)
-			return true
+			return nil
 		}
 	}
-	return false
+	return ErrUserNotFound
 }
