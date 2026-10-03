@@ -59,7 +59,7 @@ func (h *UserHandler) GetUser(c echo.Context) error {
 		return errorResponse(c, http.StatusInternalServerError, "internal server error")
 	}
 	return c.JSON(http.StatusOK, user)
-	
+
 }
 
 func (h *UserHandler) CreateUser(c echo.Context) error {
@@ -67,7 +67,7 @@ func (h *UserHandler) CreateUser(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid request")
 	}
-	if err := c.Validate(&req); err!= nil {
+	if err := c.Validate(&req); err != nil {
 		return handleValidationError(c, err)
 	}
 	user, err := h.repo.Create(req.Name, req.Age)
@@ -86,7 +86,7 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid request")
 	}
-	if err := c.Validate(&req); err!= nil {
+	if err := c.Validate(&req); err != nil {
 		return handleValidationError(c, err)
 	}
 	user, err := h.repo.Update(id, req.Name, req.Age)

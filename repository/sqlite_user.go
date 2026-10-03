@@ -1,6 +1,6 @@
 package repository
 
-import(
+import (
 	"database/sql"
 	"errors"
 
@@ -74,9 +74,9 @@ func (r *SQLiteUserRepository) Create(name string, age int) (model.User, error) 
 		return model.User{}, err
 	}
 	user := model.User{
-		ID: int(id),
+		ID:   int(id),
 		Name: name,
-		Age: age,
+		Age:  age,
 	}
 	return user, nil
 }
@@ -88,20 +88,20 @@ func (r *SQLiteUserRepository) Update(id int, name string, age int) (model.User,
 		age,
 		id,
 	)
-	if err != nil{
+	if err != nil {
 		return model.User{}, err
 	}
 	affected, err := result.RowsAffected()
-	if err != nil{
+	if err != nil {
 		return model.User{}, err
 	}
 	if affected == 0 {
 		return model.User{}, ErrUserNotFound
 	}
 	user := model.User{
-		ID: id,
+		ID:   id,
 		Name: name,
-		Age: age,
+		Age:  age,
 	}
 	return user, nil
 }

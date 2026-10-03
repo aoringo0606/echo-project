@@ -1,16 +1,16 @@
 package main
 
 import (
-	"reflect"
-	"strings"
 	"database/sql"
 	"log"
+	"reflect"
+	"strings"
 
-	_ "modernc.org/sqlite"
 	"github.com/aoringo0606/echo-project/handler"
 	"github.com/aoringo0606/echo-project/repository"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+	_ "modernc.org/sqlite"
 )
 
 func main() {

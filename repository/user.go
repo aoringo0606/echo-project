@@ -1,6 +1,6 @@
 package repository
 
-import(
+import (
 	"errors"
 
 	"github.com/aoringo0606/echo-project/model"
@@ -26,9 +26,9 @@ func (r *UserRepository) GetAll() ([]model.User, error) {
 
 func (r *UserRepository) Create(name string, age int) (model.User, error) {
 	user := model.User{
-		ID: r.nextID,
+		ID:   r.nextID,
 		Name: name,
-		Age: age,
+		Age:  age,
 	}
 
 	r.nextID++
