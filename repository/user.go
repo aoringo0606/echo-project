@@ -47,6 +47,7 @@ func (r *UserRepository) Update(id int, name string, age int) (model.User, bool)
 		if user.ID == id {
 			r.users[i].Name = name
 			r.users[i].Age = age
+			return r.users[i], true
 		}
 	}
 	return model.User{}, false
