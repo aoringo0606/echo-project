@@ -5,12 +5,8 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/aoringo0606/echo-project/model"
 	"github.com/aoringo0606/echo-project/repository"
 )
-
-var users []model.User
-var nextID = 1
 
 type CreateUserRequest struct {
 	Name string `json:"name" validate:"required"`
@@ -33,7 +29,8 @@ func NewUserHandler(repo *repository.UserRepository) *UserHandler {
 }
 
 func (h *UserHandler) GetUsers(c echo.Context) error {
-	return c.JSON(http.StatusOK,users)
+	users := h.repo.GetAll()
+	return c.JSON(http.StatusOK, users)
 }
 
 func (h *UserHandler) GetUser(c echo.Context) error {
