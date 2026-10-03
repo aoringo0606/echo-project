@@ -18,12 +18,12 @@ func NewSQLiteUserRepository(db *sql.DB) *SQLiteUserRepository {
 }
 
 func (r *SQLiteUserRepository) GetAll() ([]model.User, error) {
+	users := make([]model.User, 0)
 	rows, err := r.db.Query("SELECT id, name, age FROM users")
 	if err != nil {
 		return []model.User{}, err
 	}
 	defer rows.Close()
-	var users []model.User
 	for rows.Next() {
 		var user model.User
 		if err := rows.Scan(
@@ -62,7 +62,7 @@ func (r *SQLiteUserRepository) FindByID(id int) (model.User, error) {
 
 func (r *SQLiteUserRepository) Create(name string, age int) (model.User, error) {
 	result, err := r.db.Exec(
-		"INSERT INTO users (name, age) VALUES (? ?)",
+		"INSERT INTO users (name, age) VALUES (?, ?)",
 		name,
 		age,
 	)
