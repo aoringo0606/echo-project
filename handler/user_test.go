@@ -37,191 +37,96 @@ func (r *FakeUserRepository) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
-func TestGetUserSuccess(t *testing.T) {
-	e := echo.New()
-
-	req := httptest.NewRequest(
-		http.MethodGet,
-		"/users/1",
-		nil,
-	)
-
-	rec := httptest.NewRecorder()
-
-	c := e.NewContext(req, rec)
-
-	c.SetParamNames("id")
-	c.SetParamValues("1")
-
-	fakeRepo := &FakeUserRepository{
-		findByIDResult: model.User{
-			ID: 1,
-			Name: "Alice",
-			Age: 20,
+func TestGetUser(t *testing.T) {
+	tests := []struct {
+		name           string
+		id             string
+		findByIDResult model.User
+		findByIDError  error
+		expectedStatus int
+		expectedBody   string
+	}{
+		{
+			name: "success",
+			id:   "1",
+			findByIDResult: model.User{
+				ID:   1,
+				Name: "Alice",
+				Age:  20,
+			},
+			findByIDError:  nil,
+			expectedStatus: http.StatusOK,
+			expectedBody:   `{"id":1,"name":"Alice","age":20}` + "\n",
 		},
-		findByIDError: nil,
+		{
+			name:           "not found",
+			id:             "999",
+			findByIDResult: model.User{},
+			findByIDError:  repository.ErrUserNotFound,
+			expectedStatus: http.StatusNotFound,
+			expectedBody:   `{"error":"user not found"}` + "\n",
+		},
+		{
+			name:           "internal server error",
+			id:             "1",
+			findByIDResult: model.User{},
+			findByIDError:  errors.New("database error"),
+			expectedStatus: http.StatusInternalServerError,
+			expectedBody:   `{"error":"internal server error"}` + "\n",
+		},
+		{
+			name:           "invalid id",
+			id:             "abc",
+			findByIDResult: model.User{},
+			findByIDError:  nil,
+			expectedStatus: http.StatusBadRequest,
+			expectedBody:   `{"error":"invalid id"}` + "\n",
+		},
 	}
 
-	h := NewUserHandler(fakeRepo)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
 
-	err := h.GetUser(c)
-	if err != nil {
-		t.Fatal(err)
-	}
+			req := httptest.NewRequest(
+				http.MethodGet,
+				"/users/"+tt.id,
+				nil,
+			)
 
-	if rec.Code != http.StatusOK {
-		t.Errorf(
-			"expected status %d, got %d",
-			http.StatusOK,
-			rec.Code,
-		)
-	}
+			rec := httptest.NewRecorder()
 
-	expected := `{"id":1,"name":"Alice","age":20}` + "\n"
+			c := e.NewContext(req, rec)
+			c.SetParamNames("id")
+			c.SetParamValues(tt.id)
 
-	if rec.Body.String() != expected {
-		t.Errorf(
-			"expected body %q, got %q",
-			expected,
-			rec.Body.String(),
-		)
-	}
-}
+			fakeRepo := &FakeUserRepository{
+				findByIDResult: tt.findByIDResult,
+				findByIDError:  tt.findByIDError,
+			}
 
-func TestGetUserNotFound(t *testing.T) {
-	e := echo.New()
+			h := NewUserHandler(fakeRepo)
 
-	req := httptest.NewRequest(
-		http.MethodGet,
-		"/users/999",
-		nil,
-	)
+			err := h.GetUser(c)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-	rec := httptest.NewRecorder()
+			if rec.Code != tt.expectedStatus {
+				t.Errorf(
+					"expected status %d, got %d",
+					tt.expectedStatus,
+					rec.Code,
+				)
+			}
 
-	c := e.NewContext(req, rec)
-
-	c.SetParamNames("id")
-	c.SetParamValues("999")
-
-	fakeRepo := &FakeUserRepository{
-		findByIDResult: model.User{},
-		findByIDError: repository.ErrUserNotFound,
-	}
-
-	h := NewUserHandler(fakeRepo)
-
-	err := h.GetUser(c)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if rec.Code != http.StatusNotFound {
-		t.Errorf(
-			"expected status %d, got %d",
-			http.StatusNotFound,
-			rec.Code,
-		)
-	}
-
-	expected := `{"error":"user not found"}` + "\n"
-
-	if rec.Body.String() != expected {
-		t.Errorf(
-			"expected body %q, got %q",
-			expected,
-			rec.Body.String(),
-		)
-	}
-}
-
-func TestGetUserInternalServerError(t *testing.T) {
-	e := echo.New()
-
-	req := httptest.NewRequest(
-		http.MethodGet,
-		"/users/500",
-		nil,
-	)
-
-	rec := httptest.NewRecorder()
-
-	c := e.NewContext(req, rec)
-
-	c.SetParamNames("id")
-	c.SetParamValues("500")
-
-	fakeRepo := &FakeUserRepository{
-		findByIDResult: model.User{},
-		findByIDError: errors.New("database broken"),
-	}
-
-	h := NewUserHandler(fakeRepo)
-
-	err := h.GetUser(c)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if rec.Code != http.StatusInternalServerError {
-		t.Errorf(
-			"expected status %d, got %d",
-			http.StatusInternalServerError,
-			rec.Code,
-		)
-	}
-
-	expected := `{"error":"internal server error"}` + "\n"
-
-	if rec.Body.String() != expected {
-		t.Errorf(
-			"expected body %q, got %q",
-			expected,
-			rec.Body.String(),
-		)
-	}
-}
-
-func TestGetUserInvalidID(t *testing.T) {
-		e := echo.New()
-
-	req := httptest.NewRequest(
-		http.MethodGet,
-		"/users/abc",
-		nil,
-	)
-
-	rec := httptest.NewRecorder()
-
-	c := e.NewContext(req, rec)
-
-	c.SetParamNames("id")
-	c.SetParamValues("abc")
-
-	fakeRepo := &FakeUserRepository{}
-
-	h := NewUserHandler(fakeRepo)
-
-	err := h.GetUser(c)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if rec.Code != http.StatusBadRequest {
-		t.Errorf(
-			"expected status %d, got %d",
-			http.StatusBadRequest,
-			rec.Code,
-		)
-	}
-
-	expected := `{"error":"invalid id"}` + "\n"
-
-	if rec.Body.String() != expected {
-		t.Errorf(
-			"expected body %q, got %q",
-			expected,
-			rec.Body.String(),
-		)
+			if rec.Body.String() != tt.expectedBody {
+				t.Errorf(
+					"expected body %q, got %q",
+					tt.expectedBody,
+					rec.Body.String(),
+				)
+			}
+		})
 	}
 }
