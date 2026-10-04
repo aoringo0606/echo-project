@@ -14,11 +14,11 @@ import (
 
 type FakeUserRepository struct {
 	findByIDResult model.User
-	findByIdError error
+	findByIDError error
 }
 
 func (r *FakeUserRepository) FindByID(ctx context.Context, id int) (model.User, error) {
-	return r.findByIDResult, r.findByIdError
+	return r.findByIDResult, r.findByIDError
 }
 
 func (r *FakeUserRepository) GetAll(ctx context.Context) ([]model.User, error) {
@@ -59,7 +59,7 @@ func TestGetUserSuccess(t *testing.T) {
 			Name: "Alice",
 			Age: 20,
 		},
-		findByIdError: nil,
+		findByIDError: nil,
 	}
 
 	h := NewUserHandler(fakeRepo)
@@ -106,7 +106,7 @@ func TestGetUserNotFound(t *testing.T) {
 
 	fakeRepo := &FakeUserRepository{
 		findByIDResult: model.User{},
-		findByIdError: repository.ErrUserNotFound,
+		findByIDError: repository.ErrUserNotFound,
 	}
 
 	h := NewUserHandler(fakeRepo)
@@ -153,7 +153,7 @@ func TestGetUserInternalServerError(t *testing.T) {
 
 	fakeRepo := &FakeUserRepository{
 		findByIDResult: model.User{},
-		findByIdError: errors.New("database broken"),
+		findByIDError: errors.New("database broken"),
 	}
 
 	h := NewUserHandler(fakeRepo)
@@ -198,10 +198,7 @@ func TestGetUserInvalidID(t *testing.T) {
 	c.SetParamNames("id")
 	c.SetParamValues("abc")
 
-	fakeRepo := &FakeUserRepository{
-		findByIDResult: model.User{},
-		findByIdError: errors.New("database error"),
-	}
+	fakeRepo := &FakeUserRepository{}
 
 	h := NewUserHandler(fakeRepo)
 
