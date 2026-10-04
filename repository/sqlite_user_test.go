@@ -138,7 +138,7 @@ func TestSQLiteUserRepositoryCRUD(t *testing.T) {
 	_, err = repo.FindByID(ctx, created.ID)
 	if !errors.Is(err, ErrUserNotFound) {
 		t.Errorf(
-			"expected ErruserNotFound, got %v",
+			"expected ErrUserNotFound, got %v",
 			err,
 		)
 	}
@@ -152,7 +152,7 @@ func TestSQLiteUserRepositoryUpdateNotFound(t *testing.T) {
 	_, err := repo.Update(ctx, 999, "Alice", 20)
 	if !errors.Is(err, ErrUserNotFound) {
 		t.Errorf(
-			"expected ErruserNotFound, got %v",
+			"expected ErrUserNotFound, got %v",
 			err,
 		)
 	}
@@ -166,7 +166,7 @@ func TestSQLiteUserRepositoryDeleteNotFound(t *testing.T) {
 	err := repo.Delete(ctx, 1)
 	if !errors.Is(err, ErrUserNotFound) {
 		t.Errorf(
-			"expected ErruserNotFound, got %v",
+			"expected ErrUserNotFound, got %v",
 			err,
 		)
 	}
