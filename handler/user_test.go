@@ -17,10 +17,10 @@ import (
 
 type FakeUserRepository struct {
 	findByIDResult model.User
-	findByIDError error
+	findByIDError  error
 
 	createResult model.User
-	createError error
+	createError  error
 }
 
 func (r *FakeUserRepository) FindByID(ctx context.Context, id int) (model.User, error) {
@@ -139,59 +139,59 @@ func TestGetUser(t *testing.T) {
 
 func TestCreateUser(t *testing.T) {
 	tests := []struct {
-		name string
-		body string
-		createResult model.User
-		createError error
+		name           string
+		body           string
+		createResult   model.User
+		createError    error
 		expectedStatus int
-		expectedBody string
+		expectedBody   string
 	}{
 		{
 			name: "Success",
 			body: `{"name":"Alice","age":20}`,
 			createResult: model.User{
-				ID: 1,
+				ID:   1,
 				Name: "Alice",
-				Age: 20,
+				Age:  20,
 			},
-			createError: nil,
+			createError:    nil,
 			expectedStatus: http.StatusCreated,
-			expectedBody: `{"id":1,"name":"Alice","age":20}` + "\n",
+			expectedBody:   `{"id":1,"name":"Alice","age":20}` + "\n",
 		},
 		{
-			name: "broken JSON",
-			body: `{"name":"Alice","age":`,
-			createResult: model.User{},
-			createError: nil,
+			name:           "broken JSON",
+			body:           `{"name":"Alice","age":`,
+			createResult:   model.User{},
+			createError:    nil,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody: `{"error":"invalid request"}` + "\n",
+			expectedBody:   `{"error":"invalid request"}` + "\n",
 		},
 		{
-			name: "blank name",
-			body: `{"name":"","age":20}`,
-			createResult: model.User{},
-			createError: nil,
+			name:           "blank name",
+			body:           `{"name":"","age":20}`,
+			createResult:   model.User{},
+			createError:    nil,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody: `{"errors":{"name":"name is required"}}` + "\n",
+			expectedBody:   `{"errors":{"name":"name is required"}}` + "\n",
 		},
 		{
-			name: "negative age",
-			body: `{"name":"Alice","age":-1}`,
-			createResult: model.User{},
-			createError: nil,
+			name:           "negative age",
+			body:           `{"name":"Alice","age":-1}`,
+			createResult:   model.User{},
+			createError:    nil,
 			expectedStatus: http.StatusBadRequest,
-			expectedBody: `{"errors":{"age":"age must be greater than or equal to 0"}}` + "\n",
+			expectedBody:   `{"errors":{"age":"age must be greater than or equal to 0"}}` + "\n",
 		},
 		{
-			name: "internal server error",
-			body: `{"name":"Alice","age":20}`,
-			createResult: model.User{},
-			createError: errors.New("database error"),
+			name:           "internal server error",
+			body:           `{"name":"Alice","age":20}`,
+			createResult:   model.User{},
+			createError:    errors.New("database error"),
 			expectedStatus: http.StatusInternalServerError,
-			expectedBody: `{"error":"internal server error"}` + "\n",
+			expectedBody:   `{"error":"internal server error"}` + "\n",
 		},
 	}
-	for _, tt  := range tests {
+	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := echo.New()
 
@@ -209,7 +209,7 @@ func TestCreateUser(t *testing.T) {
 
 			e.Validator = NewCustomValidator(v)
 
-						req := httptest.NewRequest(
+			req := httptest.NewRequest(
 				http.MethodPost,
 				"/users",
 				strings.NewReader(tt.body),
@@ -225,7 +225,7 @@ func TestCreateUser(t *testing.T) {
 
 			fakeRepo := &FakeUserRepository{
 				createResult: tt.createResult,
-				createError: tt.createError,
+				createError:  tt.createError,
 			}
 
 			h := NewUserHandler(fakeRepo)
