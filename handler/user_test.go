@@ -76,6 +76,16 @@ func TestGetUserSuccess(t *testing.T) {
 			rec.Code,
 		)
 	}
+
+	expected := `{"id":1,"name":"Alice","age":20}` + "\n"
+
+	if rec.Body.String() != expected {
+		t.Errorf(
+			"expected body %q, got %q",
+			expected,
+			rec.Body.String(),
+		)
+	}
 }
 
 func TestGetUserNotFound(t *testing.T) {
