@@ -124,7 +124,7 @@ func TestSQLiteUserRepositoryCRUD(t *testing.T) {
 	}
 	if users[0] != updated {
 		t.Errorf(
-			"exptected user %+v, got %+v",
+			"expected user %+v, got %+v",
 			updated,
 			users[0],
 		)
