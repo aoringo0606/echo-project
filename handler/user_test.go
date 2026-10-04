@@ -237,7 +237,7 @@ func TestCreateUser(t *testing.T) {
 
 			if rec.Code != tt.expectedStatus {
 				t.Errorf(
-					"exptected status %d, got %d",
+					"expected status %d, got %d",
 					tt.expectedStatus,
 					rec.Code,
 				)
