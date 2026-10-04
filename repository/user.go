@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 
 	"github.com/aoringo0606/echo-project/model"
@@ -20,11 +21,11 @@ func NewUserRepository() *UserRepository {
 	}
 }
 
-func (r *UserRepository) GetAll() ([]model.User, error) {
+func (r *UserRepository) GetAll(_ context.Context) ([]model.User, error) {
 	return r.users, nil
 }
 
-func (r *UserRepository) Create(name string, age int) (model.User, error) {
+func (r *UserRepository) Create(_ context.Context, name string, age int) (model.User, error) {
 	user := model.User{
 		ID:   r.nextID,
 		Name: name,
@@ -37,7 +38,7 @@ func (r *UserRepository) Create(name string, age int) (model.User, error) {
 	return user, nil
 }
 
-func (r *UserRepository) FindByID(id int) (model.User, error) {
+func (r *UserRepository) FindByID(_ context.Context, id int) (model.User, error) {
 	for _, user := range r.users {
 		if user.ID == id {
 			return user, nil
@@ -46,7 +47,7 @@ func (r *UserRepository) FindByID(id int) (model.User, error) {
 	return model.User{}, ErrUserNotFound
 }
 
-func (r *UserRepository) Update(id int, name string, age int) (model.User, error) {
+func (r *UserRepository) Update(_ context.Context, id int, name string, age int) (model.User, error) {
 	for i, user := range r.users {
 		if user.ID == id {
 			r.users[i].Name = name
@@ -57,7 +58,7 @@ func (r *UserRepository) Update(id int, name string, age int) (model.User, error
 	return model.User{}, ErrUserNotFound
 }
 
-func (r *UserRepository) Delete(id int) error {
+func (r *UserRepository) Delete(_ context.Context, id int) error {
 	for i, user := range r.users {
 		if user.ID == id {
 			r.users = append(r.users[:i], r.users[i+1:]...)

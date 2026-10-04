@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 
@@ -17,9 +18,9 @@ func NewSQLiteUserRepository(db *sql.DB) *SQLiteUserRepository {
 	}
 }
 
-func (r *SQLiteUserRepository) GetAll() ([]model.User, error) {
+func (r *SQLiteUserRepository) GetAll(ctx context.Context) ([]model.User, error) {
 	users := make([]model.User, 0)
-	rows, err := r.db.Query("SELECT id, name, age FROM users")
+	rows, err := r.db.QueryContext(ctx, "SELECT id, name, age FROM users")
 	if err != nil {
 		return []model.User{}, err
 	}
@@ -41,9 +42,10 @@ func (r *SQLiteUserRepository) GetAll() ([]model.User, error) {
 	return users, nil
 }
 
-func (r *SQLiteUserRepository) FindByID(id int) (model.User, error) {
+func (r *SQLiteUserRepository) FindByID(ctx context.Context, id int) (model.User, error) {
 	var user model.User
-	err := r.db.QueryRow(
+	err := r.db.QueryRowContext(
+		ctx,
 		"SELECT id, name, age FROM users WHERE id = ?",
 		id,
 	).Scan(
@@ -60,8 +62,9 @@ func (r *SQLiteUserRepository) FindByID(id int) (model.User, error) {
 	return user, nil
 }
 
-func (r *SQLiteUserRepository) Create(name string, age int) (model.User, error) {
-	result, err := r.db.Exec(
+func (r *SQLiteUserRepository) Create(ctx context.Context, name string, age int) (model.User, error) {
+	result, err := r.db.ExecContext(
+		ctx,
 		"INSERT INTO users (name, age) VALUES (?, ?)",
 		name,
 		age,
@@ -81,8 +84,9 @@ func (r *SQLiteUserRepository) Create(name string, age int) (model.User, error) 
 	return user, nil
 }
 
-func (r *SQLiteUserRepository) Update(id int, name string, age int) (model.User, error) {
-	result, err := r.db.Exec(
+func (r *SQLiteUserRepository) Update(ctx context.Context, id int, name string, age int) (model.User, error) {
+	result, err := r.db.ExecContext(
+		ctx, 
 		"UPDATE users SET name = ?, age = ? WHERE id = ?",
 		name,
 		age,
@@ -106,8 +110,9 @@ func (r *SQLiteUserRepository) Update(id int, name string, age int) (model.User,
 	return user, nil
 }
 
-func (r *SQLiteUserRepository) Delete(id int) error {
-	result, err := r.db.Exec(
+func (r *SQLiteUserRepository) Delete(ctx context.Context, id int) error {
+	result, err := r.db.ExecContext(
+		ctx,
 		"DELETE FROM users WHERE id = ?",
 		id,
 	)

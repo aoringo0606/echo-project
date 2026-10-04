@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strconv"
@@ -21,11 +22,11 @@ type UpdateUserRequest struct {
 }
 
 type UserRepository interface {
-	GetAll() ([]model.User, error)
-	FindByID(id int) (model.User, error)
-	Create(name string, age int) (model.User, error)
-	Update(id int, name string, age int) (model.User, error)
-	Delete(id int) error
+	GetAll(ctx context.Context) ([]model.User, error)
+	FindByID(ctx context.Context, id int) (model.User, error)
+	Create(ctx context.Context, name string, age int) (model.User, error)
+	Update(ctx context.Context, id int, name string, age int) (model.User, error)
+	Delete(ctx context.Context, id int) error
 }
 
 type UserHandler struct {
@@ -39,7 +40,7 @@ func NewUserHandler(repo UserRepository) *UserHandler {
 }
 
 func (h *UserHandler) GetUsers(c echo.Context) error {
-	users, err := h.repo.GetAll()
+	users, err := h.repo.GetAll(c.Request().Context())
 	if err != nil {
 		return errorResponse(c, http.StatusInternalServerError, "internal server error")
 	}
@@ -51,7 +52,7 @@ func (h *UserHandler) GetUser(c echo.Context) error {
 	if err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid id")
 	}
-	user, err := h.repo.FindByID(id)
+	user, err := h.repo.FindByID(c.Request().Context(), id)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
 			return errorResponse(c, http.StatusNotFound, "user not found")
@@ -70,7 +71,7 @@ func (h *UserHandler) CreateUser(c echo.Context) error {
 	if err := c.Validate(&req); err != nil {
 		return handleValidationError(c, err)
 	}
-	user, err := h.repo.Create(req.Name, req.Age)
+	user, err := h.repo.Create(c.Request().Context(), req.Name, req.Age)
 	if err != nil {
 		return errorResponse(c, http.StatusInternalServerError, "internal server error")
 	}
@@ -89,7 +90,7 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 	if err := c.Validate(&req); err != nil {
 		return handleValidationError(c, err)
 	}
-	user, err := h.repo.Update(id, req.Name, req.Age)
+	user, err := h.repo.Update(c.Request().Context(), id, req.Name, req.Age)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
 			return errorResponse(c, http.StatusNotFound, "user not found")
@@ -104,7 +105,7 @@ func (h *UserHandler) DeleteUser(c echo.Context) error {
 	if err != nil {
 		return errorResponse(c, http.StatusBadRequest, "invalid id")
 	}
-	err = h.repo.Delete(id)
+	err = h.repo.Delete(c.Request().Context(), id)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
 			return errorResponse(c, http.StatusNotFound, "user not found")
