@@ -43,6 +43,50 @@ func (r *FakeUserRepository) Delete(ctx context.Context, id int) error {
 	return nil
 }
 
+func newTestEcho() *echo.Echo {
+	e := echo.New()
+
+	v := validator.New()
+
+	v.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+
+		if name == "-" {
+			return ""
+		}
+
+		return name
+	})
+
+	e.Validator = NewCustomValidator(v)
+
+	return e
+}
+
+func assertResponse(
+	t *testing.T,
+	rec *httptest.ResponseRecorder,
+	expectedStatus int,
+	expectedBody string,
+) {
+	t.Helper()
+
+	if rec.Code != expectedStatus {
+		t.Errorf(
+			"expected status %d, got %d",
+			expectedStatus,
+			rec.Code,
+		)
+	}
+	if rec.Body.String() != expectedBody {
+		t.Errorf(
+			"expected body %q, got %q",
+			expectedBody,
+			rec.Body.String(),
+		)
+	}
+}
+
 func TestGetUser(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -92,7 +136,7 @@ func TestGetUser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := echo.New()
+			e := newTestEcho()
 
 			req := httptest.NewRequest(
 				http.MethodGet,
@@ -118,21 +162,7 @@ func TestGetUser(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if rec.Code != tt.expectedStatus {
-				t.Errorf(
-					"expected status %d, got %d",
-					tt.expectedStatus,
-					rec.Code,
-				)
-			}
-
-			if rec.Body.String() != tt.expectedBody {
-				t.Errorf(
-					"expected body %q, got %q",
-					tt.expectedBody,
-					rec.Body.String(),
-				)
-			}
+			assertResponse(t, rec, tt.expectedStatus, tt.expectedBody)
 		})
 	}
 }
@@ -193,21 +223,7 @@ func TestCreateUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := echo.New()
-
-			v := validator.New()
-
-			v.RegisterTagNameFunc(func(fld reflect.StructField) string {
-				name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
-
-				if name == "-" {
-					return ""
-				}
-
-				return name
-			})
-
-			e.Validator = NewCustomValidator(v)
+			e := newTestEcho()
 
 			req := httptest.NewRequest(
 				http.MethodPost,
@@ -235,21 +251,7 @@ func TestCreateUser(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			if rec.Code != tt.expectedStatus {
-				t.Errorf(
-					"expected status %d, got %d",
-					tt.expectedStatus,
-					rec.Code,
-				)
-			}
-
-			if rec.Body.String() != tt.expectedBody {
-				t.Errorf(
-					"expected body %q, got %q",
-					tt.expectedBody,
-					rec.Body.String(),
-				)
-			}
+			assertResponse(t, rec, tt.expectedStatus, tt.expectedBody)
 		})
 	}
 }
