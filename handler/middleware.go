@@ -25,21 +25,23 @@ func LoggerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		authorization := c.Request().Header.Get("Authorization")
+func NewAuthMiddleware(token string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			authorization := c.Request().Header.Get("Authorization")
 
-		parts := strings.SplitN(authorization, " ", 2)
-		if len(parts) != 2 {
-			return errorResponse(c, http.StatusUnauthorized, "unauthorized")
-		}
-		if parts[0] != "Bearer" {
-			return errorResponse(c, http.StatusUnauthorized, "unauthorized")
-		}
-		if parts[1] != "secret-token" {
-			return errorResponse(c, http.StatusUnauthorized, "unauthorized")
-		}
+			parts := strings.SplitN(authorization, " ", 2)
+			if len(parts) != 2 {
+				return errorResponse(c, http.StatusUnauthorized, "unauthorized")
+			}
+			if parts[0] != "Bearer" {
+				return errorResponse(c, http.StatusUnauthorized, "unauthorized")
+			}
+			if parts[1] != token {
+				return errorResponse(c, http.StatusUnauthorized, "unauthorized")
+			}
 
-		return next(c)
+			return next(c)
+		}
 	}
 }

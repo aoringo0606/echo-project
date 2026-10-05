@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 
+	"github.com/aoringo0606/echo-project/config"
 	"github.com/aoringo0606/echo-project/handler"
 	"github.com/aoringo0606/echo-project/repository"
 	"github.com/go-playground/validator/v10"
@@ -16,9 +17,14 @@ import (
 func main() {
 	e := echo.New()
 
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	e.Use(handler.LoggerMiddleware)
 
-	db, err := sql.Open("sqlite", "users.db")
+	db, err := sql.Open("sqlite", cfg.DBPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,7 +67,7 @@ func main() {
 	userGroup.GET("", userHandler.GetUsers)
 	userGroup.GET("/:id", userHandler.GetUser)
 
-	protectedUsers := userGroup.Group("", handler.AuthMiddleware)
+	protectedUsers := userGroup.Group("", handler.NewAuthMiddleware(cfg.AuthToken))
 
 	protectedUsers.POST("", userHandler.CreateUser)
 	protectedUsers.PUT("/:id", userHandler.UpdateUser)
